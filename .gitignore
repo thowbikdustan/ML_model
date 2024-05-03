@@ -1,4 +1,5 @@
-.test
-.csv
+*.test
+*.csv
 venv/
 env/
+*.venv
