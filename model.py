@@ -36,9 +36,9 @@ class Predict():
             print('Model Name not provided')
             print('Model Names available:\n\t==> RandomForestClassifier')
             exit(1)
-        # if model_name == 'DecisionTreeClassifier':
-        #     model = DecisionTreeClassifier()
-        if model_name == 'RandomForestClassifier':
+        if model_name == 'DecisionTreeClassifier':
+            self.model = DecisionTreeClassifier()
+        elif model_name == 'RandomForestClassifier':
             self.model = RandomForestClassifier()
         else:
             print('UMM UMM Check the model name again')
@@ -63,9 +63,19 @@ class Predict():
         predictions = self.model.predict(X_test)
 
         accuracy = accuracy_score(y_test, predictions)
-        precision = precision_score(y_test, predictions)
         confusion = confusion_matrix(y_test, predictions)
-        recall = recall_score(y_test, predictions)
+        
+        try:
+            precision = precision_score(y_test, predictions)
+            recall = recall_score(y_test, predictions)
+        except ValueError as ve:
+
+            error_message = str(ve)
+            if "Target is multiclass" in error_message:
+                precision = precision_score(y_test, predictions, average="micro")
+                recall = recall_score(y_test, predictions, average="micro")
+            else:
+                print(f"Error: {error_message}")
 
         if accuracy < 0.70:
             output = ["Accuracy of the prediciting training Data", f"{print_colored_text(accuracy, colors.RED)}"], ["Confusion Matrix for the Model", f"{confusion}"], ["Precision Score for the Model", f"{precision}"], ["Recall Score for the Model", f"{recall}"]
@@ -76,9 +86,9 @@ class Predict():
 
         print(tabulate(output, headers=alogirthm_name, tablefmt="grid"))
 
-
-# result = Predict('TrainingDataBinary.csv', 'marker', 'TestingDataBinary.csv')
-# result.prediction('TrainingResultBinary.csv', 'RandomForestClassifier')
-
-evaluate = Predict('TrainingDataBinary.csv', 'marker')
+evaluate = Predict('TrainingDataMulti.csv', 'marker')
+evaluate.model_evaluation('DecisionTreeClassifier')
 evaluate.model_evaluation('RandomForestClassifier')
+
+result = Predict('TrainingDataMulti.csv', 'marker', 'TestingDataMulti.csv')
+result.prediction('TestingResultMulti.csv', 'RandomForestClassifier')
