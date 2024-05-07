@@ -2,7 +2,20 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, confusion_matrix, recall_score
+from tabulate import tabulate
+
+class colors():
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    END = '\033[0m'
+
+def print_colored_text(text, color):
+    return f"{color}{text}{colors.END}"
 
 class Predict():
     def __init__(self, Training_data: str, Target_column: str, Predict_data: str = None) -> pd.DataFrame:
@@ -44,12 +57,24 @@ class Predict():
     
     def model_evaluation(self,  model_name: str = None):
         X_train, X_test, y_train, y_test = train_test_split(self.X, self.y, test_size=0.2)
+        alogirthm_name = ["Machine Learning Model:", print_colored_text(model_name, colors.MAGENTA)]
 
         self.model_training(model_name, X_train, y_train)
         predictions = self.model.predict(X_test)
 
         accuracy = accuracy_score(y_test, predictions)
-        print(accuracy)
+        precision = precision_score(y_test, predictions)
+        confusion = confusion_matrix(y_test, predictions)
+        recall = recall_score(y_test, predictions)
+
+        if accuracy < 0.70:
+            output = ["Accuracy of the prediciting training Data", f"{print_colored_text(accuracy, colors.RED)}"], ["Confusion Matrix for the Model", f"{confusion}"], ["Precision Score for the Model", f"{precision}"], ["Recall Score for the Model", f"{recall}"]
+        elif 0.70 <= accuracy  <= 0.85:
+            output = ["Accuracy of the prediciting training Data", f"{print_colored_text(accuracy, colors.YELLOW)}"], ["Confusion Matrix for the Algorithm", f"{confusion}"], ["Precision Score for the Model", f"{precision}"], ["Recall Score for the Model", f"{recall}"]
+        else:
+            output = ["Accuracy of the prediciting training Data", f"{print_colored_text(accuracy, colors.GREEN)}"], ["Confusion Matrix for the Algorithm", f"{confusion}"], ["Precision Score for the Model", f"{precision}"], ["Recall Score for the Model", f"{recall}"]
+
+        print(tabulate(output, headers=alogirthm_name, tablefmt="grid"))
 
 
 # result = Predict('TrainingDataBinary.csv', 'marker', 'TestingDataBinary.csv')
